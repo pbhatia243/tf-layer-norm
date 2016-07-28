@@ -20,8 +20,6 @@ from tensorflow.python.ops import variable_scope
 import tensorflow as tf
 from tensorflow.python.ops import clip_ops
 
-# from my_rnn import *
-# import my_rnn as rnn_cell
 try:
   linear = tf.nn.rnn_cell.linear
 except:
