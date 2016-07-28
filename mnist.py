@@ -1,7 +1,8 @@
 '''
-A Reccurent Neural Network (LSTM) implementation example using TensorFlow library.
+A Recurent Neural Network (LSTM) implementation example using TensorFlow library.
 This example is using the MNIST database of handwritten digits (http://yann.lecun.com/exdb/mnist/)
 Long Short Term Memory paper: http://deeplearning.cs.cmu.edu/pdfs/Hochreiter97_lstm.pdf
+
 Example code is adapted from https://github.com/aymericdamien/TensorFlow-Examples/
 Author: Parminder
 '''

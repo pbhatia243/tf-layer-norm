@@ -34,7 +34,7 @@ To evaluate the new model, we train it on MNIST. Here is the model and results u
 Usage
 -----
 
-To train a mnist model with Ubuntu dataset:
+To train a mnist model with different cell_types:
 
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type LNGRU
     
