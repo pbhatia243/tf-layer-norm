@@ -23,7 +23,7 @@ Prerequisites
 
 MNIST
 -----
-To evaluate the new model, we train it on MNIST. Here is the model and results using Layer normalized GRU
+To evaluate the new model, we train it on MNIST. Here is the model and results using Layer Normalized GRU
 
 ![histogram](./assets/model_gru3.png)
 
@@ -36,7 +36,7 @@ Usage
 
 To train a mnist model with Ubuntu dataset:
 
-    $ ppython mnist.py --hidden 128 summaries_dir log/ --cell_type LNGRU
+    $ python mnist.py --hidden 128 summaries_dir log/ --cell_type LNGRU
     
  cell_type = [LNGRU, LNLSTM, LSTM , GRU, BasicRNN]
     
