@@ -41,7 +41,9 @@ To train a mnist model with different cell_types:
  cell_type = [LNGRU, LNLSTM, LSTM , GRU, BasicRNN]
     
 
+To view graph:
 
+    $ tensorboard --logdir log/train/
 
 Todo
 -----
