@@ -55,15 +55,27 @@ class LNGRUCell(rnn_cell.RNNCell):
     with vs.variable_scope(scope or type(self).__name__):  # "GRUCell"
       with vs.variable_scope("Gates"):  # Reset gate and update gate.
         # We start with bias of 1.0 to not reset and not update.
+        with vs.variable_scope( "Layer_Parameters"):
 
-        s1 = tf.Variable(tf.ones([2*dim]), name="s1")
-        s2 = tf.Variable(tf.ones([2*dim]), name="s2")
-        s3 = tf.Variable(tf.ones([dim]), name="s3")
-        s4 = tf.Variable(tf.ones([dim]), name="s4")
-        b1 = tf.Variable(tf.zeros([2*dim]), name="b1")
-        b2 = tf.Variable(tf.zeros([2*dim]), name="b2")
-        b3 = tf.Variable(tf.zeros([dim]), name="b3")
-        b4 = tf.Variable(tf.zeros([dim]), name="b4")
+          s1 = vs.get_variable("s1", initializer=tf.ones([2*dim]), dtype=tf.float32)
+          s2 = vs.get_variable("s2", initializer=tf.ones([2*dim]), dtype=tf.float32)
+          s3 = vs.get_variable("s3", initializer=tf.ones([dim]), dtype=tf.float32)
+          s4 = vs.get_variable("s4", initializer=tf.ones([dim]), dtype=tf.float32)
+          b1 = vs.get_variable("b1", initializer=tf.zeros([2*dim]), dtype=tf.float32)
+          b2 = vs.get_variable("b2", initializer=tf.zeros([2*dim]), dtype=tf.float32)
+          b3 = vs.get_variable("b3", initializer=tf.zeros([dim]), dtype=tf.float32)
+          b4 = vs.get_variable("b4", initializer=tf.zeros([dim]), dtype=tf.float32)
+
+
+          # Code below initialized for all cells
+          # s1 = tf.Variable(tf.ones([2 * dim]), name="s1")
+          # s2 = tf.Variable(tf.ones([2 * dim]), name="s2")
+          # s3 = tf.Variable(tf.ones([dim]), name="s3")
+          # s4 = tf.Variable(tf.ones([dim]), name="s4")
+          # b1 = tf.Variable(tf.zeros([2 * dim]), name="b1")
+          # b2 = tf.Variable(tf.zeros([2 * dim]), name="b2")
+          # b3 = tf.Variable(tf.zeros([dim]), name="b3")
+          # b4 = tf.Variable(tf.zeros([dim]), name="b4")
 
         input_below_ = rnn_cell._linear([inputs],
                                2 * self._num_units, False, scope="out_1")
@@ -147,13 +159,21 @@ class LNBasicLSTMCell(rnn_cell.RNNCell):
       else:
         c, h = array_ops.split(1, 2, state)
 
-      s1 = tf.Variable(tf.ones([4 * self._num_units]), name="s1")
-      s2 = tf.Variable(tf.ones([4 * self._num_units]), name="s2")
-      s3 = tf.Variable(tf.ones([self._num_units]), name="s3")
+      s1 = vs.get_variable("s1", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+      s2 = vs.get_variable("s2", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+      s3 = vs.get_variable("s3", initializer=tf.ones([self._num_units]), dtype=tf.float32)
 
-      b1 = tf.Variable(tf.zeros([4 * self._num_units]), name="b1")
-      b2 = tf.Variable(tf.zeros([4 * self._num_units]), name="b2")
-      b3 = tf.Variable(tf.zeros([self._num_units]), name="b3")
+      b1 = vs.get_variable("b1", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+      b2 = vs.get_variable("b2", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+      b3 = vs.get_variable("b3", initializer=tf.zeros([self._num_units]), dtype=tf.float32)
+
+      # s1 = tf.Variable(tf.ones([4 * self._num_units]), name="s1")
+      # s2 = tf.Variable(tf.ones([4 * self._num_units]), name="s2")
+      # s3 = tf.Variable(tf.ones([self._num_units]), name="s3")
+      #
+      # b1 = tf.Variable(tf.zeros([4 * self._num_units]), name="b1")
+      # b2 = tf.Variable(tf.zeros([4 * self._num_units]), name="b2")
+      # b3 = tf.Variable(tf.zeros([self._num_units]), name="b3")
 
       input_below_ = rnn_cell._linear([inputs],
                                       4 * self._num_units, False, scope="out_1")
@@ -290,13 +310,21 @@ class LNLSTMCell(rnn_cell.RNNCell):
     with vs.variable_scope(scope or type(self).__name__,
                            initializer=self._initializer):  # "LSTMCell"
 
-      s1 = tf.Variable(tf.ones([4 * self._num_units]), name="s1")
-      s2 = tf.Variable(tf.ones([4 * self._num_units]), name="s2")
-      s3 = tf.Variable(tf.ones([self._num_units]), name="s3")
+      s1 = vs.get_variable("s1", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+      s2 = vs.get_variable("s2", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+      s3 = vs.get_variable("s3", initializer=tf.ones([self._num_units]), dtype=tf.float32)
 
-      b1 = tf.Variable(tf.zeros([4 * self._num_units]), name="b1")
-      b2 = tf.Variable(tf.zeros([4 * self._num_units]), name="b2")
-      b3 = tf.Variable(tf.zeros([self._num_units]), name="b3")
+      b1 = vs.get_variable("b1", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+      b2 = vs.get_variable("b2", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+      b3 = vs.get_variable("b3", initializer=tf.zeros([self._num_units]), dtype=tf.float32)
+
+      # s1 = tf.Variable(tf.ones([4 * self._num_units]), name="s1")
+      # s2 = tf.Variable(tf.ones([4 * self._num_units]), name="s2")
+      # s3 = tf.Variable(tf.ones([self._num_units]), name="s3")
+      #
+      # b1 = tf.Variable(tf.zeros([4 * self._num_units]), name="b1")
+      # b2 = tf.Variable(tf.zeros([4 * self._num_units]), name="b2")
+      # b3 = tf.Variable(tf.zeros([self._num_units]), name="b3")
 
       input_below_ = rnn_cell._linear([inputs],
                                       4 * self._num_units, False, scope="out_1")

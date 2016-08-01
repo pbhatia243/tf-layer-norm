@@ -118,7 +118,9 @@ def train():
                                               sess.graph)
     # Initializing the variables
     init = tf.initialize_all_variables()
-
+    # print tf.trainable_variables()
+    for v in tf.trainable_variables():
+        print v.name
     sess.run(init)
     test_len = 128
     test_data = mnist.test.images[:test_len].reshape((-1, n_steps, n_input))
