@@ -47,6 +47,7 @@ To train a mnist model with HyperLSTM:
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type HyperLnLSTMCell --layer_norm 0
 
 To train a mnist model with HyperLSTM and Layer Normalization:
+
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type HyperLnLSTMCell --layer_norm 1
 
 
