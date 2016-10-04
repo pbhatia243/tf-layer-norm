@@ -34,8 +34,8 @@ tf.app.flags.DEFINE_integer("classes", 10,
                             "NUmber of classes")
 tf.app.flags.DEFINE_integer("layers", 1,
                             "NUmber of layers for the model")
-tf.app.flags.DEFINE_string("cell_type", "LNGRU" , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM")
-tf.app.flags.DEFINE_integer("layer_norm", 0 , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM")
+tf.app.flags.DEFINE_string("cell_type", "LNGRU" , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM, HyperLnLSTMCell")
+tf.app.flags.DEFINE_integer("layer_norm", 0 , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM, HyperLnLSTMCell")
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string("summaries_dir", "./log/" , "Directory for summary")
 FLAGS = tf.app.flags.FLAGS

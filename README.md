@@ -42,17 +42,17 @@ To train a mnist model with different cell_types:
 
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type LNGRU
 
-To train a mnist model with HyperLSTM:
+To train a mnist model with HyperNetworks:
 
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type HyperLnLSTMCell --layer_norm 0
 
-To train a mnist model with HyperLSTM and Layer Normalization:
+To train a mnist model with HyperNetworks and Layer Normalization:
 
     $ python mnist.py --hidden 128 summaries_dir log/ --cell_type HyperLnLSTMCell --layer_norm 1
 
 
     
- cell_type = [LNGRU, LNLSTM, LSTM , GRU, BasicRNN,LNLSTM]
+ cell_type = [LNGRU, LNLSTM, LSTM , GRU, BasicRNN, HyperLnLSTMCell]
     
 
 To view graph:
