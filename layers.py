@@ -32,6 +32,8 @@ def ln(input, s, b, epsilon = 1e-5, max = 1000):
     normalised_input = (input - m) / tf.sqrt(v + epsilon)
     return normalised_input * s + b
 
+
+
 class LNGRUCell(rnn_cell.RNNCell):
   """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078)."""
 
@@ -198,6 +200,116 @@ class LNBasicLSTMCell(rnn_cell.RNNCell):
       else:
         new_state = array_ops.concat(1, [new_c, new_h])
       return new_h, new_state
+
+
+class HyperLnLSTMCell(rnn_cell.RNNCell):
+  """Basic LSTM recurrent network cell.
+  The implementation is based on: http://arxiv.org/abs/1409.2329.
+  We add forget_bias (default: 1) to the biases of the forget gate in order to
+  reduce the scale of forgetting in the beginning of the training.
+  It does not allow cell clipping, a projection layer, and does not
+  use peep-hole connections: it is the basic baseline.
+  For advanced models, please use the full LSTMCell that follows.
+  """
+
+  def __init__(self, num_units, forget_bias=1.0, input_size=None,
+               state_is_tuple=False, activation=tanh, hyper_num_units=128, hyper_embedding_size=32, is_layer_norm = True):
+    """Initialize the basic LSTM cell.
+    Args:
+      num_units: int, The number of units in the LSTM cell.
+      hyper_num_units: int, The number of units in the HyperLSTM cell.
+      forget_bias: float, The bias added to forget gates (see above).
+      input_size: Deprecated and unused.
+      state_is_tuple: If True, accepted and returned states are 2-tuples of
+        the `c_state` and `m_state`.  By default (False), they are concatenated
+        along the column axis.  This default behavior will soon be deprecated.
+      activation: Activation function of the inner states.
+    """
+    if not state_is_tuple:
+      print("%s: Using a concatenated state is slower and will soon be "
+                   "deprecated.  Use state_is_tuple=True.", self)
+    if input_size is not None:
+        print("%s: The input_size parameter is deprecated.", self)
+    self._num_units = num_units
+    self._forget_bias = forget_bias
+    self._state_is_tuple = state_is_tuple
+    self._activation = activation
+    self.hyper_num_units = hyper_num_units
+    self.total_num_units = self._num_units + self.hyper_num_units
+    self.hyper_cell = rnn_cell.BasicLSTMCell(hyper_num_units)
+    self.hyper_embedding_size= hyper_embedding_size
+    self.is_layer_norm = is_layer_norm
+
+  @property
+  def state_size(self):
+    return 2 * self.total_num_units
+    # return (LSTMStateTuple(self._num_units, self._num_units)
+    #         if self._state_is_tuple else 2 * self._num_units)
+
+  @property
+  def output_size(self):
+    return self._num_units
+
+  def hyper_norm(self, layer, dimensions, scope="hyper"):
+    with tf.variable_scope(scope):
+      zw = rnn_cell._linear(self.hyper_output,
+                            self.hyper_embedding_size, False, scope=scope+ "z")
+      alpha = rnn_cell._linear(zw, dimensions, False, scope=scope+ "alpha")
+      result = tf.mul(alpha, layer)
+
+      return result
+
+  def __call__(self, inputs, state, scope=None):
+    """Long short-term memory cell (LSTM) with hypernetworks and layer normalization."""
+    with vs.variable_scope(scope or type(self).__name__):
+      # Parameters of gates are concatenated into one multiply for efficiency.
+      total_h, total_c = tf.split(1, 2, state)
+      h = total_h[:, 0:self._num_units]
+      c = total_c[:, 0:self._num_units]
+
+      self.hyper_state = tf.concat(1, [total_h[:, self._num_units:], total_c[:, self._num_units:]])
+      hyper_input = tf.concat(1, [inputs, h])
+      hyper_output, hyper_new_state = self.hyper_cell(hyper_input, self.hyper_state)
+      self.hyper_output = hyper_output
+      self.hyper_state = hyper_new_state
+
+      input_below_ = rnn_cell._linear([inputs],
+                                      4 * self._num_units, False, scope="out_1")
+      input_below_ = self.hyper_norm(input_below_, 4 * self._num_units, scope="hyper_x")
+      state_below_ = rnn_cell._linear([h],
+                                      4 * self._num_units, False, scope="out_2")
+      state_below_ = self.hyper_norm(state_below_, 4 * self._num_units, scope="hyper_h")
+
+      if self.is_layer_norm:
+        s1 = vs.get_variable("s1", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+        s2 = vs.get_variable("s2", initializer=tf.ones([4 * self._num_units]), dtype=tf.float32)
+        s3 = vs.get_variable("s3", initializer=tf.ones([self._num_units]), dtype=tf.float32)
+
+        b1 = vs.get_variable("b1", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+        b2 = vs.get_variable("b2", initializer=tf.zeros([4 * self._num_units]), dtype=tf.float32)
+        b3 = vs.get_variable("b3", initializer=tf.zeros([self._num_units]), dtype=tf.float32)
+
+
+        input_below_ = ln(input_below_, s1, b1)
+
+
+        state_below_ = ln(state_below_, s2, b2)
+
+      lstm_matrix = tf.add(input_below_, state_below_)
+      i, j, f, o = array_ops.split(1, 4, lstm_matrix)
+      new_c = (c * sigmoid(f) + sigmoid(i) *
+               self._activation(j))
+
+      # Currently normalizing c causes lot of nan's in the model, thus commenting it out for now.
+      # new_c_ = ln(new_c, s3, b3)
+      new_c_ = new_c
+      new_h = self._activation(new_c_) * sigmoid(o)
+
+      hyper_h, hyper_c = tf.split(1, 2, hyper_new_state)
+      new_total_h = tf.concat(1, [new_h, hyper_h])
+      new_total_c = tf.concat(1, [new_c, hyper_c])
+      new_total_state = tf.concat(1, [new_total_h, new_total_c])
+      return new_h, new_total_state
 
 class LNLSTMCell(rnn_cell.RNNCell):
   """Long short-term memory unit (LSTM) recurrent network cell.

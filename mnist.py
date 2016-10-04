@@ -35,6 +35,7 @@ tf.app.flags.DEFINE_integer("classes", 10,
 tf.app.flags.DEFINE_integer("layers", 1,
                             "NUmber of layers for the model")
 tf.app.flags.DEFINE_string("cell_type", "LNGRU" , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM")
+tf.app.flags.DEFINE_integer("layer_norm", 0 , "Select from LSTM, GRU , BasicRNN, LNGRU, LNLSTM")
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string("summaries_dir", "./log/" , "Directory for summary")
 FLAGS = tf.app.flags.FLAGS
@@ -68,7 +69,7 @@ def train():
 
 
 
-    def RNN(x, weights, biases, type):
+    def RNN(x, weights, biases, type, layer_norm):
 
         # Prepare data shape to match `rnn` function requirements
         # Current data input shape: (batch_size, n_steps, n_input)
@@ -80,13 +81,15 @@ def train():
         x = tf.reshape(x, [-1, n_input])
         # Split to get a list of 'n_steps' tensors of shape (batch_size, n_input)
         x = tf.split(0, n_steps, x)
+
         # Define a lstm cell with tensorflow
         cell_class_map = {
              "LSTM": rnn_cell.BasicLSTMCell(n_hidden),
              "GRU": rnn_cell.GRUCell(n_hidden),
              "BasicRNN": rnn_cell.BasicRNNCell(n_hidden),
              "LNGRU": LNGRUCell(n_hidden),
-             "LNLSTM": LNBasicLSTMCell(n_hidden)}
+             "LNLSTM": LNBasicLSTMCell(n_hidden),
+            'HyperLnLSTMCell':HyperLnLSTMCell(n_hidden, is_layer_norm = layer_norm)}
 
         lstm_cell = cell_class_map.get(type)
         cell = rnn_cell.MultiRNNCell([lstm_cell] * FLAGS.layers)
@@ -98,7 +101,11 @@ def train():
         return tf.matmul(outputs[-1], weights['out']) + biases['out']
 
 
-    pred = RNN(x, weights, biases, FLAGS.cell_type)
+    if FLAGS.layer_norm ==1:
+        layer_norm = True
+    else:
+        layer_norm= False
+    pred = RNN(x, weights, biases, FLAGS.cell_type, layer_norm)
 
     # Define loss and optimizer
     # print pred
